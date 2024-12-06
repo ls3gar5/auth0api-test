@@ -7,7 +7,7 @@ export class AppService {
   private axiosInstance: AxiosInstance;
   constructor() {
     this.axiosInstance = axios.create({
-      baseURL: process.env.AUTH0_QA_BASEURL,
+      baseURL: process.env[`AUTH0_${process.env.NODE_ENV}_BASEURL`],
       headers: {
         'Content-Type': 'application/json',
       },
@@ -16,9 +16,9 @@ export class AppService {
 
   async setToken(): Promise<void> {
     const response = await this.axiosInstance.post('/oauth/token', {
-      client_id: process.env.AUTH0_QA_CLIENT_ID,
-      client_secret: process.env.AUTH0_QA_CLIENT_SECRET,
-      audience: process.env.AUTH0_QA_AUDIENCE,
+      client_id: process.env[`AUTH0_${process.env.NODE_ENV}_CLIENT_ID`],
+      client_secret: process.env[`AUTH0_${process.env.NODE_ENV}_CLIENT_SECRET`],
+      audience: process.env[`AUTH0_${process.env.NODE_ENV}_AUDIENCE`],
       grant_type: 'client_credentials',
     });
 
