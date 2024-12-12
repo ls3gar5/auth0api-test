@@ -1,5 +1,5 @@
-export class Emails {
-  emailsdev = [
+export const EMAILS = {
+  DEV: [
     'juan.melo+client1@finalis.com',
     'manuel.sierra+mkponly2@finalis.com',
     'manuel.sierra+mkponly@finalis.com',
@@ -88,9 +88,8 @@ export class Emails {
     'ivan+mmbo@finalis.com',
     'pablo.cassata+mmbo@finalis.com',
     'ivan+2@finalis.com',
-  ];
-
-  emailsstg = [
+  ],
+  STG: [
     'hernan.landoni+mbo@finalis.com',
     'marina.jolias+stg-mou@finalis.com',
     'andres.guerra+stgmarketplacebackoffice@finalis.com',
@@ -197,9 +196,8 @@ export class Emails {
     'miguel+mmbo@finalis.com',
     'ivan+mmbo@finalis.com',
     'pablo.cassata+mmbo@finalis.com',
-  ];
-
-  emailsqa = [
+  ],
+  QA: [
     'qa+cnonlyqa@finalis.com',
     'damian.kuperman+coupordb@finalis.com',
     'andres.guerra+qamymou11@finalis.com',
@@ -354,5 +352,5 @@ export class Emails {
     'miguel+mmbo@finalis.com',
     'ivan+mmbo@finalis.com',
     'pablo.cassata+mmbo@finalis.com',
-  ];
-}
+  ],
+};
