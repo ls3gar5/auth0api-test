@@ -81,7 +81,7 @@ export class AppService {
     const batches = chunk(userIdsToUpdate, 5);
     console.log('batches to update users process', batches.length);
 
-    const batchIndex = 1;
+    let batchIndex = 1;
     const results = [];
     for (const batch of batches) {
       console.log('Batch number =>: ', batchIndex);
@@ -106,6 +106,7 @@ export class AppService {
         }),
       );
       await this.delay();
+      batchIndex += 1;
     }
     return results;
   }
