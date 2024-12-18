@@ -2,11 +2,17 @@ import { Injectable } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { EMAILS } from 'db/emails';
 import { chunk, isEmpty } from 'lodash';
+import { Users } from './users/users.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AppService {
   private axiosInstance: AxiosInstance;
-  constructor() {
+  constructor(
+    @InjectRepository(Users)
+    private usersRepository: Repository<Users>,
+  ) {
     this.axiosInstance = axios.create({
       baseURL: process.env[`AUTH0_${process.env.NODE_ENV}_BASEURL`],
       headers: {
@@ -28,7 +34,7 @@ export class AppService {
     ] = `Bearer ${response.data.access_token}`;
   }
 
-  getEmailListToProcess(): string[][] {
+  batchesEmailListToProcess(): string[][] {
     const emails: string[] = EMAILS[process.env.NODE_ENV];
     const batches = chunk(emails, 8);
     console.log('Amount of email to process: ', emails.length);
@@ -45,7 +51,7 @@ export class AppService {
         batch.map(async (email) => {
           try {
             const [userId, isBlocked] = await this.getUserIdByEmail(email);
-            if (!isEmpty(userId) && !isBlocked) {
+            if (isEmpty(userId) && !isBlocked) {
               console.log(email);
               userIdsToUpdate.push(userId);
             }
@@ -109,6 +115,65 @@ export class AppService {
       batchIndex += 1;
     }
     return results;
+  }
+
+  async getEmailListNotExistInAuth0(batches: string[][]): Promise<string[]> {
+    const userEmailNotExistInAuth0List: string[] = [];
+    let batchIndex = 1;
+
+    for (const batch of batches) {
+      console.log('Batch number =>: ', batchIndex);
+      await Promise.all(
+        batch.map(async (email) => {
+          try {
+            const [userId, isBlocked] = await this.getUserIdByEmail(email);
+            if (isEmpty(userId) && !isBlocked) {
+              console.log(email);
+              userEmailNotExistInAuth0List.push(email);
+            }
+          } catch (error) {
+            console.error(`Error processing email ${email}:`, error);
+          }
+        }),
+      );
+      await this.delay();
+      batchIndex += 1;
+    }
+    console.log(
+      'Amount of users to update: ',
+      userEmailNotExistInAuth0List.length,
+    );
+    return userEmailNotExistInAuth0List;
+  }
+
+  async getUserDetailByEmailPostgres(emails: string[]): Promise<Users[]> {
+    const batches = chunk(emails, 8);
+    console.log('PG Amount of email to process: ', emails.length);
+    console.log('PG Batches data to process: ', batches.length);
+    const userList: Users[] = [];
+    let batchIndex = 1;
+    for (const batch of batches) {
+      console.log('PG Batch number =>: ', batchIndex);
+      await Promise.all(
+        batch.map(async (email) => {
+          try {
+            const user: Users = await this.usersRepository.findOneBy({
+              email,
+            });
+            if (user) {
+              console.log(user.email);
+              userList.push(user);
+            }
+          } catch (error) {
+            console.error(`Error processing email ${email}:`, error);
+          }
+        }),
+      );
+      await this.delay();
+      batchIndex += 1;
+    }
+    console.log('Amount of users to update: ', userList.length);
+    return userList;
   }
 
   delay = () => {
