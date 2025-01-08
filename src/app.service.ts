@@ -56,7 +56,10 @@ export class AppService {
               userIdsToUpdate.push(userId);
             }
           } catch (error) {
-            console.error(`Error processing email ${email}:`, error);
+            if (error.response)
+              console.error(`Error processing email ${email}:`, error.response);
+            if (error.request) console.log(`Network Error: ${error.request}`);
+            console.log(`Error: ${error.message}`);
           }
         }),
       );
